@@ -1,0 +1,77 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <head>
+    <title>Computer Graphics 2019 mini project</title>
+    <meta charset="utf-8">
+    <link href="style.css" rel="stylesheet">
+  </head>
+  <body>
+    <div id="container"></div>
+    <div id="info">
+      <strong><a href="https://www.khronos.org/webgl/">WebGL data visualization project</a></strong> <span class="bull">&bull;</span> DKU CG 2019 <span class="bull">&bull;</span> Data from <a href="https://simplemaps.com/data/world-cities">simplemaps.com</a>
+    </div>
+
+    <div id="currentInfo">
+      <span class="year"></span>
+    </div>
+
+    <div id="title">
+      인구 데이터 시각화
+    </div>
+    <div id="currentInfo">
+      <span class="year">2019</span>
+    </div>
+    <script type="text/javascript" src="./lib/Detector.js"></script>
+    <script type="text/javascript" src="./lib/three.min.js"></script>
+    <script type="text/javascript" src="./lib/Tween.js"></script>
+    <script type="text/javascript" src="./viz.js"></script>
+    <script type="text/javascript">
+
+      if(!Detector.webgl){
+        Detector.addGetWebGLMessage();
+      } else {
+        var sphere = new DAT.Sphere(container);
+        //console.log(sphere);
+        var i;
+        var settime = function(sphere, t) {
+          return function() {
+            // tween.js (https://github.com/tweenjs/tween.js/)
+            // 애니메이션 설정
+            new TWEEN.Tween(sphere).to({time: 0},500).easing(TWEEN.Easing.Cubic.EaseOut).start();
+          };
+        };
+        TWEEN.start();
+        
+        // 데이터 보내기(addData 호출)
+        var xhr;
+        xhr = new XMLHttpRequest();
+        xhr.open('GET', './test.json', true);
+        xhr.onreadystatechange = function(e) {
+          if (xhr.readyState === 4) { // 데이터 전부 받은 상태
+            if (xhr.status === 200) { // 요청성공
+              // JSON 데이터 읽기
+              var data = JSON.parse(xhr.responseText);
+              window.data = data;
+              for (i=0;i<data.length;i++) {
+                //console.log(data[i][1], data[i][0])
+                sphere.addData(data[i][1], {
+                  name: data[i][0]
+                });
+              }
+              // 그래프 생성하기
+              sphere.createGraphs();
+              settime(sphere,0)();
+              sphere.animate();
+              // 로딩 있을 경우 지울것
+              document.body.style.backgroundImage = 'none'; // remove loading
+            }
+          }
+        };
+        xhr.send(null);
+      }
+      
+    </script>
+
+  </body>
+
+</html>
